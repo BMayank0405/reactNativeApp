@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { StyleSheet, Modal, FlatList } from 'react-native';
+import { StyleSheet, Modal, FlatList, Alert, Image } from 'react-native';
 import DatePicker from 'react-native-datepicker'
-import { Container, Header, Content, Button, Text, Grid, Body } from 'native-base';
+import { Container, Header, Content, Button, Text, Body, Grid, Spinner, Card, Icon, CardItem, Left, Thumbnail, Right } from 'native-base';
 export default class MyDatePicker extends Component {
 	constructor(props) {
 		super(props)
@@ -23,33 +23,40 @@ export default class MyDatePicker extends Component {
 			isloading: false
 		}
 	}
-	_cardItems = ({ item }) => (
-		<Content>
+
+	//card items for rendering 
+	_cardItems = ({ item }) => {
+		return (
 			<Card>
 				<CardItem cardBody>
 					<Image source={{ uri: item.url }} style={{ height: 200, width: null, flex: 1 }} />
 				</CardItem>
 				<CardItem>
 					<Left>
-						<Body transparent>
-							<Grid>
-								<Icon active name="ios-clock-outline" iconLeft />
-								<Text>Updated on</Text>
-							</Grid>
-						</Body>
+						<Icon active name="thumbs-up" />
+						<Text>Update At</Text>
 					</Left>
 					<Body>
-						<Body transparent>
-							<Text>{item.title}</Text>
-						</Body>
+						<Text>{this._convert(item.title)}</Text>
 					</Body>
 				</CardItem>
 			</Card>
-		</Content>
-	)
+		)
+	}
+
+	//timestamp functions
+	_convert(timestamp) {
+		const date = new Date(timestamp)
+		return this._format(date.getDate()) + '-' + this._format(date.getMonth()) + '-' + date.getFullYear();
+	}
 
 	_format = (value) => value > 10 ? value : '0' + value
+	//end of timestamp functions
 
+
+	_keyExtractor = (item, index) => item.id.toString();
+
+	//validating dates
 	_StartDateChange(date) {
 		this.setState({
 			startDate: date,
@@ -65,15 +72,18 @@ export default class MyDatePicker extends Component {
 			})
 		}
 	}
-	_setModalVisible(visible) {
-		this.setState({ modalVisible: visible });
-	}
 	_EndDateChange(date) {
 		this.setState({
 			endDate: date,
 			endTime: Date.parse(date)
 		})
 	}
+	//end of validating dates
+
+	_setModalVisible(visible) {
+		this.setState({ modalVisible: visible });
+	}
+
 
 	async _Search() {
 		this.setState({
@@ -101,8 +111,9 @@ export default class MyDatePicker extends Component {
 		this.setState({
 			isloading: false,
 			modalVisible: true,
-			item: { value: items }
+			items: { value: items }
 		})
+		// console.log(this.state.items.value);
 
 	}
 
@@ -171,7 +182,27 @@ export default class MyDatePicker extends Component {
 							<Text>Search</Text>
 						</Button>
 					</Grid>
-
+					<Modal animationType="slide"
+						transparent={false}
+						visible={this.state.modalVisible}
+						onRequestClose={() => {
+							Alert.alert('Modal has been closed.');
+							this._setModalVisible(!this.state.modalVisible);
+						}}>
+						<Content >
+							<FlatList style={{ flex: 1 }}
+								data={this.state.items.value}
+								renderItem={this._cardItems}
+								keyExtractor={this._keyExtractor} />
+							<Body>
+								<Button onPress={() => {
+									this._setModalVisible(!this.state.modalVisible);
+								}}>
+									<Text>close modal</Text>
+								</Button>
+							</Body>
+						</Content>
+					</Modal>
 				</Content>
 			</Container>
 		)
