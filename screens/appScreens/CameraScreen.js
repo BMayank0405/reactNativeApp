@@ -1,58 +1,85 @@
 import React, { Component } from "react";
 import {
 	View,
-	Text,
 	StyleSheet,
-	TouchableOpacity
+	TouchableOpacity,
+	Image,
+	ImageBackground
 } from "react-native";
 
 import { Camera, FileSystem, Permissions } from 'expo';
-import { Container, Content, Header, Item, Icon, Input, Button } from 'native-base'
+import { Container, Content, Button, Text, Body, Grid, Spinner, Card, Icon, CardItem, Left, Footer, FooterTab } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MySpinner from "../../components/MySpinner";
 
 class CameraComponent extends Component {
 
 	state = {
 		hasCameraPermission: null,
-		type: Camera.Constants.Type.back
+		type: Camera.Constants.Type.back,
+		url: null,
+		newPhoto: false,
+		isloading: false
 	}
 
 	async componentWillMount() {
 		const { status } = await Permissions.askAsync(Permissions.CAMERA);
-		console.log(status)
 		this.setState({ hasCameraPermission: status === 'granted' })
 	}
-	componentDidMount() {
-		console.log(FileSystem.documentDirectory);
-		FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'appphotosnewc').catch(e => {
-			console.log(e, 'Directory exists');
-		});
+	async componentDidMount() {
+		console.log(FileSystem);
+		try {
+			await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'appphotosnewc')
+		}
+		catch (err) {
+			console.log(err);
+		}
+
 	}
 
-	async _takePicture() {
-		console.log('take picture');
-		this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved });
+	_takePicture = async () => {
+		this.camera.takePictureAsync({ onPictureSaved: this._onPictureSaved });
 
 	};
-	onPictureSaved = async photo => {
-		await FileSystem.moveAsync({
-			from: photo.uri,
-			to: `${FileSystem.documentDirectory}appphotosnewcd/${Date.now()}.jpg`,
-		});
-		this.setState({ newPhotos: true });
-	}
-	async _uploadImage() {
-		const data = new FormData();
-		data.append('name', 'testName'); // you can append anyone.
-		data.append('image', {
-			uri: photo.uri,
-			type: 'image/jpeg', // or photo.type
-			name: 'testPhotoName'
-		});
-		const result = await fetch(url, {
-			method: 'post',
-			body: data
+	_onPictureSaved = async photo => {
+		await this.setState({
+			url: photo.uri,
+			newPhoto: true,
 		})
+
+	}
+	_uploadImage = async () => {
+		this.setState({
+			isloading: true,
+			newPhoto: false
+		})
+		const data = new FormData();
+		const timestamp = Date.now();
+		data.append('timestamp', timestamp); // you can append anyone.
+		data.append('image', {
+			uri: this.state.url,
+			type: 'image/jpeg', // or photo.type
+			name: 'IMG-' + timestamp + '.jpg'
+		});
+		try {
+			const result = await fetch('https://pocappserver.herokuapp.com/savePhotos', {
+				method: 'post',
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				},
+				body: data
+			})
+			console.log("result", result)
+
+		}
+		catch (err) {
+			console.log("error", err)
+		}
+		this.setState({
+			isloading: false,
+			newPhoto: false
+		})
+
 	}
 	render() {
 		const { hasCameraPermission } = this.state
@@ -63,44 +90,80 @@ class CameraComponent extends Component {
 		else if (hasCameraPermission === false) {
 			return <Text> No access to camera</Text>
 		}
+		else if (this.state.isloading == true) {
+			return <MySpinner />
+		}
+		else if (this.state.newPhoto == true) {
+			return (
+
+				<ImageBackground source={{ uri: this.state.url }} imageStyle={{ resizeMode: 'cover' }} style={styles.backgroundImage}>
+					<Container style={styles.footer}>
+						<Button rounded style={styles.fButton} onPress={this._uploadImage}>
+							<Icon name="md-send" style={{ fontSize: 50 }} />
+						</Button>
+					</Container>
+				</ImageBackground>
+			)
+		}
 		else {
 			return (
-				<View style={{ flex: 1 }}>
-					<Camera ref={ref => {
-						this.camera = ref;
-					}}
-						style style={{ flex: 1, justifyContent: 'space-between' }} type={this.state.type} >
-						<View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginBottom: 15, alignItems: 'flex-end' }}>
-
-							<View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginBottom: 15, alignItems: 'flex-end' }}>
-								<View style={{ alignItems: 'center' }}>
-									<TouchableOpacity
-										onPress={this._takePicture()}
-										style={{ alignSelf: 'center' }}
-									>
-										<MaterialCommunityIcons name="circle-outline"
-											style={{ color: 'white', fontSize: 100 }}
-										></MaterialCommunityIcons>
-									</TouchableOpacity>
-								</View>
-
-							</View>
-							<View style={{ alignItems: 'center' }}>
-
-							</View>
-						</View>
-					</Camera>
-				</View >
+				<Container>
+					<Content>
+						<Camera ref={ref => {
+							this.camera = ref;
+						}} type={this.state.type} >
+							<Container style={styles.footer}>
+								<TouchableOpacity
+									onPress={this._takePicture}
+									style={{ alignSelf: 'center' }}
+								>
+									<MaterialCommunityIcons name="circle-outline"
+										style={{ color: 'white', fontSize: 100 }}
+									></MaterialCommunityIcons>
+								</TouchableOpacity>
+							</Container>
+						</Camera>
+					</Content>
+				</Container>
 			)
 		}
 	}
 }
-export default CameraComponent;
+
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center'
+	},
+	backgroundImage: {
+		width: '100%',
+		height: '100%',
+		flex: 1
+	},
+	text: {
+		textAlign: 'center',
+		color: 'white',
+		backgroundColor: 'rgba(0,0,0,0)',
+		fontSize: 32
+	},
+	footer: {
+		width: '100%',
+		display: 'flex',
+		backgroundColor: 'transparent',
+		justifyContent: 'flex-end',
+		marginBottom: 20
+	},
+	fButton: {
+		display: 'flex',
+		alignItems: 'center',
+		alignContent: 'center',
+		alignSelf: 'center',
+		justifyContent: 'center',
+		height: 80,
+		width: 80
 	}
 });
+
+export default CameraComponent;

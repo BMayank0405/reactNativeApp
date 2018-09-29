@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux';
 import { Login } from '../action/LoginAction';
-import { Container, Content, Text, Spinner, Header, Title, Button, Left, Right, Body, Icon, Toast } from 'native-base';
+import { Container, Content, Text, Spinner, Title, Button, Left, Right, Body, Icon, Toast } from 'native-base';
+import MySpinner from '../components/MySpinner'
 class LoginScreen extends Component {
 
 	constructor(props) {
@@ -27,7 +28,7 @@ class LoginScreen extends Component {
 		})
 		const user = await this.props.Login();
 		if (Object.keys(user).length > 1) {
-			try{
+			try {
 				const result = await fetch('https://pocappserver.herokuapp.com/user', {
 					method: "POST",
 					mode: "cors",
@@ -36,16 +37,16 @@ class LoginScreen extends Component {
 						photoUrl: user.photo,
 						email: user.email
 					})
-	
+
 				})
 
 				console.log(result);
-		this.setState({
-			isLoading: false
-		})
-		this.props.navigation.navigate(Object.keys(this.props.userDtl.userDetail || {}).length > 0 ? 'App' : 'Login')
+				this.setState({
+					isLoading: false
+				})
+				this.props.navigation.navigate(Object.keys(this.props.userDtl.userDetail || {}).length > 0 ? 'App' : 'Login')
 			}
-			catch(err){}
+			catch (err) { }
 
 		}
 
@@ -55,13 +56,7 @@ class LoginScreen extends Component {
 	render() {
 		if (this.state.isLoading) {
 			return (
-				<Container style={styles.container}>
-					<Content></Content>
-					<Content>
-						<Spinner color="blue" />
-					</Content>
-					<Content></Content>
-				</Container>
+				<MySpinner />
 			)
 		}
 		else {

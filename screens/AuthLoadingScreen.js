@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Font } from "expo"
-import { Container, Content, Spinner, Header, Title, Button, Left, Right, Body, Icon } from 'native-base';
+import MySpinner from '../components/MySpinner'
 
 class AuthLoadingScreen extends Component {
 
@@ -19,11 +19,7 @@ class AuthLoadingScreen extends Component {
 	}
 	render() {
 		return (
-			<Container>
-				<Content>
-					<Spinner />
-				</Content>
-			</Container>
+			<MySpinner />
 		);
 	}
 }

@@ -1,7 +1,12 @@
 import React, { Component } from 'react'
 import { StyleSheet, Modal, FlatList, Alert, Image } from 'react-native';
 import DatePicker from 'react-native-datepicker'
-import { Container, Header, Content, Button, Text, Body, Grid, Spinner, Card, Icon, CardItem, Left, Thumbnail, Right } from 'native-base';
+import { Container, Content, Button, Text, Body, Grid, Spinner, Card, Icon, CardItem, Left } from 'native-base';
+
+import MySpinner from '../../components/MySpinner'
+import MyHeader from '../../components/MyHeader'
+
+
 export default class MyDatePicker extends Component {
 	constructor(props) {
 		super(props)
@@ -72,6 +77,7 @@ export default class MyDatePicker extends Component {
 			})
 		}
 	}
+
 	_EndDateChange(date) {
 		this.setState({
 			endDate: date,
@@ -119,91 +125,90 @@ export default class MyDatePicker extends Component {
 
 	render() {
 		return (this.state.isloading ?
-			<Container style={styles.container}>
-				<Content>
-					<Spinner />
-				</Content>
-			</Container>
+			<MySpinner />
 			:
-			<Container style={styles.container}>
-				<Content>
-					<Grid>
-						<Text>From</Text>
-						<DatePicker
-							style={{ width: 200 }}
-							date={this.state.startDate}
-							mode="date"
-							placeholder="select date"
-							format="YYYY-MM-DD"
-							minDate="2018-09-20"
-							confirmBtnText="Confirm"
-							cancelBtnText="Cancel"
-							customStyles={{
-								dateIcon: {
-									position: 'absolute',
-									left: 0,
-									top: 7,
-									marginLeft: 10
-								},
-								dateInput: {
-									marginLeft: 45
-								}
-							}}
-							onDateChange={(date) => this._StartDateChange(date)}
-						/>
-					</Grid>
-					<Grid>
-						<Text>To</Text>
-						<DatePicker
-							style={{ width: 200 }}
-							date={this.state.endDate}
-							mode="date"
-							placeholder="select date"
-							format="YYYY-MM-DD"
-							minDate={this.state.minEndDate}
-							confirmBtnText="Confirm"
-							cancelBtnText="Cancel"
-							customStyles={{
-								dateIcon: {
-									position: 'absolute',
-									left: 0,
-									top: 7,
-									marginLeft: 10
-								},
-								dateInput: {
-									marginLeft: 45
-								}
-							}}
-							onDateChange={(date) => this._EndDateChange(date)}
-						/>
-					</Grid>
-					<Grid>
-						<Button style={styles.button} onPress={() => this._Search()}>
-							<Text>Search</Text>
-						</Button>
-					</Grid>
-					<Modal animationType="slide"
-						transparent={false}
-						visible={this.state.modalVisible}
-						onRequestClose={() => {
-							Alert.alert('Modal has been closed.');
-							this._setModalVisible(!this.state.modalVisible);
-						}}>
-						<Content >
-							<FlatList style={{ flex: 1 }}
-								data={this.state.items.value}
-								renderItem={this._cardItems}
-								keyExtractor={this._keyExtractor} />
-							<Body>
-								<Button onPress={() => {
-									this._setModalVisible(!this.state.modalVisible);
-								}}>
-									<Text>close modal</Text>
-								</Button>
-							</Body>
-						</Content>
-					</Modal>
-				</Content>
+			<Container>
+				<MyHeader />
+				<Container style={styles.container}>
+
+					<Content>
+						<Grid style={styles.marginBottom}>
+							<Text>From</Text>
+							<DatePicker
+								style={{ width: 200 }}
+								date={this.state.startDate}
+								mode="date"
+								placeholder="select date"
+								format="YYYY-MM-DD"
+								minDate="2018-09-20"
+								confirmBtnText="Confirm"
+								cancelBtnText="Cancel"
+								customStyles={{
+									dateIcon: {
+										position: 'absolute',
+										left: 0,
+										top: 7,
+										marginLeft: 10
+									},
+									dateInput: {
+										marginLeft: 45
+									}
+								}}
+								onDateChange={(date) => this._StartDateChange(date)}
+							/>
+						</Grid>
+						<Grid style={styles.marginBottom}	>
+							<Text>To</Text>
+							<DatePicker
+								style={{ width: 200 }}
+								date={this.state.endDate}
+								mode="date"
+								placeholder="select date"
+								format="YYYY-MM-DD"
+								minDate={this.state.minEndDate}
+								confirmBtnText="Confirm"
+								cancelBtnText="Cancel"
+								customStyles={{
+									dateIcon: {
+										position: 'absolute',
+										left: 0,
+										top: 7,
+										marginLeft: 10
+									},
+									dateInput: {
+										marginLeft: 45
+									}
+								}}
+								onDateChange={(date) => this._EndDateChange(date)}
+							/>
+						</Grid>
+						<Grid style={styles.button}>
+							<Button onPress={() => this._Search()}>
+								<Text>Search</Text>
+							</Button>
+						</Grid>
+						<Modal animationType="slide"
+							transparent={false}
+							visible={this.state.modalVisible}
+							onRequestClose={() => {
+								this._setModalVisible(!this.state.modalVisible);
+							}}>
+							<Content >
+								<FlatList style={{ flex: 1 }}
+									data={this.state.items.value}
+									renderItem={this._cardItems}
+									keyExtractor={this._keyExtractor} />
+								<Body>
+									<Button onPress={() => {
+										this._setModalVisible(!this.state.modalVisible);
+									}}>
+										<Text>close modal</Text>
+									</Button>
+								</Body>
+							</Content>
+						</Modal>
+					</Content>
+				</Container>
 			</Container>
 		)
 	}
@@ -215,27 +220,22 @@ const styles = StyleSheet.create({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',
+		marginTop: 30,
 		flexWrap: 'wrap',
 		backgroundColor: "#fff",
 		alignItems: "center",
 		justifyContent: "center"
 	},
-	header: {
-		alignSelf: 'center',
-		fontSize: 22
+	marginBottom: {
+		marginBottom: 10
 	},
 	button: {
-		alignSelf: 'center',
+		display: 'flex',
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
 		marginTop: 7
 
-	},
-	image: {
-		marginTop: 15,
-		width: 150,
-		height: 150,
-		borderColor: "rgba(0,0,0,0.2)",
-		borderWidth: 3,
-		borderRadius: 150
 	}
 })
 

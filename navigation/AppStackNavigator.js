@@ -4,6 +4,8 @@ import { createStackNavigator } from 'react-navigation';
 import AppTabNavigator from './AppTabNavigator';
 import Icon from 'react-native-vector-icons/Ionicons'
 
+import LogoutScreen from '../screens/LogoutScreen'
+
 const AppStackNavigator = createStackNavigator({
 	AppTabNavigator: {
 		screen: AppTabNavigator,
@@ -16,7 +18,8 @@ const AppStackNavigator = createStackNavigator({
 					</View>
 				</TouchableOpacity>
 			)
-		})
+		}),
+		Logout: LogoutScreen
 	}
 });
 export default AppStackNavigator
