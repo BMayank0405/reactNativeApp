@@ -191,7 +191,16 @@ export default class MyDatePicker extends Component {
 							transparent={false}
 							visible={this.state.modalVisible}
 							onRequestClose={() => {
-								this._setModalVisible(!this.state.modalVisible);
+								Alert.alert(
+									'Alert Title',
+									'My Alert Msg',
+									[
+										{ text: 'OK', onPress: () => this._setModalVisible(!this.state.modalVisible) },
+										{ text: 'Cancel', onPress: () => this._setModalVisible(this.state.modalVisible) },
+									],
+									{ cancelable: false }
+								)
+
 							}}>
 							<Content >
 								<FlatList style={{ flex: 1 }}

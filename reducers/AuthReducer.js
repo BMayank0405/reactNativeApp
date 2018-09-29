@@ -1,12 +1,8 @@
 import { AsyncStorage } from 'react-native';
-import { LOGIN, LOGOUT } from '../action/types';
+import { LOGIN, LOGOUT, GETDETAIL } from '../action/types';
 
 
-const initialState = {
-	userDetail: {}
-};
-
-export default (state = initialState, action) => {
+export default (state = {}, action) => {
 	switch (action.type) {
 
 		case LOGIN:
@@ -33,6 +29,11 @@ export default (state = initialState, action) => {
 			catch (err) {
 				console.log(err);
 				return state;
+			}
+		case GETDETAIL:
+			return {
+				...state,
+				userDetail: action.payload
 			}
 		default:
 			return state;

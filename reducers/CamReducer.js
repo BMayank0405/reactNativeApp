@@ -1,10 +1,10 @@
 import { AsyncStorage } from 'react-native';
-import { PERMISSION } from '../action/types';
+import { PERMISSION, LASTIMAGE, CLEARIMAGE } from '../action/types';
 import { Camera } from 'expo';
 
 const initialState = {
 	hasCameraPermission: null,
-	type: Camera.Constants.Type.back,
+	lastImage: null,
 };
 
 export default (state = initialState, action) => {
@@ -21,6 +21,17 @@ export default (state = initialState, action) => {
 				console.log(err);
 				return state;
 			}
+		case LASTIMAGE:
+			return {
+				...state,
+				lastImage: action.payload
+			}
+		case CLEARIMAGE:
+			return {
+				...state,
+				lastImage: null
+			}
+
 		default:
 			return state;
 	}
