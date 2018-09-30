@@ -23,7 +23,14 @@
       "**/*"
     ],
     "android": {
-      "package": "com.bmayank.poc"
-    }
+      "package": "com.bmayank.firstapp",
+      "config":{
+      "googleSignIn":{
+      "apiKey":"AIzaSyAFeBz11egh82U23Tm1b3Md9YfYQr_0VvA",
+      "certificateHash":"DEF2CA85908FA29A348F11AB9C2D545CA44771DD"
+      }
+      }
+    },
+    
   }
 }

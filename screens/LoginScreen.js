@@ -32,7 +32,7 @@ class LoginScreen extends Component {
 
 		try {
 			const result = await Expo.Google.logInAsync({
-				androidClientId: '117306357056-vejioaduaf6s3b4qavcqb8jerdj5659c.apps.googleusercontent.com',
+				androidStandaloneAppClientId: '117306357056-rv8au3hmj29v7kjvmsvbnurptm2tov0c.apps.googleusercontent.com',
 				scopes: ['profile', 'email'],
 			});
 			if (result.type === 'success') {
