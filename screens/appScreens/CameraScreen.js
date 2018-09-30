@@ -19,6 +19,8 @@ import { CamPermissionAction } from '../../action/CamPermissionAction'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MySpinner from "../../components/MySpinner";
 
+import { withNavigationFocus } from 'react-navigation';
+
 class CameraComponent extends Component {
 	constructor(props) {
 		super(props)
@@ -29,21 +31,43 @@ class CameraComponent extends Component {
 		url: null,
 		newPhoto: false,
 		isloading: false,
+		autoFocus: 'off'
 	}
 
 	async componentWillMount() {
 		if (this.props.hasCameraPermission) this.setState({ hasCameraPermission: true })
 		else {
+			this.setState({
+				isloading: true
+			})
 			const { status } = await Permissions.askAsync(Permissions.CAMERA);
 			await this.props.CamPermissionAction(status);
-			this.setState({ hasCameraPermission: status === 'granted' })
+			this.setState({
+				hasCameraPermission: status === 'granted',
+				isloading: false
+			})
 		}
 	}
 
 
 	//user defined functions
 	_takePicture = async () => {
-		this.camera.takePictureAsync({ onPictureSaved: this._onPictureSaved });
+		try {
+
+			const photo = await this.camera.takePictureAsync({
+				quality: 0,
+				base64: false,
+				exif: false
+			});
+			await this.setState({
+				url: photo.uri,
+				newPhoto: true,
+			})
+		}
+		catch (err) {
+			Alert.alert('Error', 'Image Could not be clicked.Try again later.')
+		}
+
 
 	};
 	_onPictureSaved = async photo => {
@@ -91,14 +115,17 @@ class CameraComponent extends Component {
 				isloading: false,
 				newPhoto: false
 			})
-			console.log("error", err)
 			Alert.alert('Error', 'There was some error.Please try again later.')
 		}
 	}
 
+
 	_clearImage = async () => {
-		console.log('object');
-		await this.props.ClearImage();
+		this.setState({
+			isloading: false,
+			newPhoto: false
+		})
+		this.props.ClearImage()
 	}
 	//end of user defined functions
 
@@ -118,6 +145,11 @@ class CameraComponent extends Component {
 		else if (this.state.newPhoto == true) {
 			return (
 				<ImageBackground source={{ uri: this.state.url }} imageStyle={{ resizeMode: 'cover' }} style={styles.backgroundImage}>
+					<Grid style={styles.cancel}>
+						<Button rounded style={styles.cancelBtn} onPress={this._clearImage}>
+							<Icon name="md-close-circle" style={{ fontSize: 35 }} />
+						</Button>
+					</Grid>
 					<Container style={styles.footer}>
 						<Button rounded style={styles.fButton} onPress={this._uploadImage}>
 							<Icon name="md-send" style={{ fontSize: 50 }} />
@@ -151,25 +183,27 @@ class CameraComponent extends Component {
 			)
 		}
 		else {
-			return (
+			return (this.props.isFocused ?
 				<Container>
 					<Content>
 						<Camera ref={ref => {
 							this.camera = ref;
-						}} type={this.state.type} >
+						}} type={this.state.type}
+							useCamera2Api={true}	>
 							<Container style={styles.footer}>
 								<TouchableOpacity
 									onPress={this._takePicture}
 									style={{ alignSelf: 'center' }}
 								>
 									<MaterialCommunityIcons name="circle-outline"
-										style={{ color: 'white', fontSize: 100 }}
+										style={{ color: 'white', fontSize: 100, marginBottom: 20 }}
 									></MaterialCommunityIcons>
 								</TouchableOpacity>
 							</Container>
 						</Camera>
 					</Content>
 				</Container>
+				: <Container />
 			)
 		}
 	}
@@ -228,6 +262,7 @@ const styles = StyleSheet.create({
 		height: 70,
 		width: 70
 	},
+
 	fRlButton: {
 		display: 'flex',
 		alignItems: 'center',
@@ -253,6 +288,17 @@ const styles = StyleSheet.create({
 		alignSelf: 'flex-end',
 		fontSize: 23,
 		marginBottom: 20
+	},
+	cancel: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+		alignItems: 'flex-start',
+		alignContent: 'flex-start',
+		marginTop: 20
+	},
+	cancelBtn: {
+		alignSelf: 'flex-start'
 	}
 });
 
@@ -263,5 +309,5 @@ const mapStateToProps = (state) => {
 		lastImage: state.camera.lastImage
 	})
 }
-
-export default connect(mapStateToProps, { LastImage, ClearImage, CamPermissionAction })(CameraComponent);
+const WithNav = withNavigationFocus(CameraComponent)
+export default connect(mapStateToProps, { LastImage, ClearImage, CamPermissionAction })(WithNav)

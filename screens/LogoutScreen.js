@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { StyleSheet } from 'react-native';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Logout } from '../action/LogoutAction';
 import { Container, Content, Text, Spinner, Header, Title, Button, Left, Right, Body, Icon, Grid, Col } from 'native-base';
+import MyHeader from "../components/MyHeader";
 class LogoutScreen extends Component {
 
 	constructor(props) {
@@ -26,18 +26,14 @@ class LogoutScreen extends Component {
 
 		return (
 			<Container >
-				<Header>
-					<Body>
-						<Title style={styles.header}>POC APP</Title>
-					</Body>
-				</Header>
+				<MyHeader />
 				<Container style={styles.container}>
 					<Content></Content>
 					<Content padder>
 						<Text style={styles.header}>Do you really want to Logout?</Text>
 						<Grid>
 							<Col>
-								<Button style={styles.button} onPress={() => this.props.navigation.navigate('Home')} >
+								<Button style={styles.button} onPress={() => this.props.navigation.navigate('App')} >
 									<Text>No</Text>
 								</Button>
 							</Col>

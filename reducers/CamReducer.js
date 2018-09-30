@@ -1,10 +1,10 @@
 import { AsyncStorage } from 'react-native';
-import { PERMISSION, LASTIMAGE, CLEARIMAGE } from '../action/types';
+import { PERMISSION, LASTIMAGE, CLEARIMAGE, TOGGLECAMERA } from '../action/types';
 import { Camera } from 'expo';
 
 const initialState = {
 	hasCameraPermission: null,
-	lastImage: null,
+	lastImage: null
 };
 
 export default (state = initialState, action) => {
@@ -31,7 +31,6 @@ export default (state = initialState, action) => {
 				...state,
 				lastImage: null
 			}
-
 		default:
 			return state;
 	}

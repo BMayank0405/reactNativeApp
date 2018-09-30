@@ -1,18 +1,21 @@
 import React, { Component } from 'react'
-import { Header, Body, Title, Right, Button, Text, Container } from "native-base";
+import { Header, Body, Title, Right, Button, Text, Container, Icon } from "native-base";
 import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux';
 
 
 class MyHeader extends Component {
+	constructor(props) {
+		super(props)
+	}
 	render() {
 		return (
 			<Header>
 				<Body>
 					<Title style={styles.header}>POC APP</Title>
 				</Body>
-				{Object.keys(this.props.userDtl.userDetail || {}).length > 0 ? <Right>
-					<Button hasText transparent>
+				{Object.keys(this.props.userDtl || {}).length > 0 ? <Right>
+					<Button hasText transparent onPress={this.props.logout}>
 						<Icon name="ios-power" />
 					</Button>
 				</Right> : <Right />}
@@ -22,7 +25,7 @@ class MyHeader extends Component {
 }
 const mapStateToProps = (state) => {
 	return ({
-		userDtl: state.user
+		userDtl: state.user.userDetail
 	})
 }
 

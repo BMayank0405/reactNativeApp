@@ -2,6 +2,7 @@ import React from 'react'
 import { createBottomTabNavigator } from 'react-navigation';
 import CameraScreen from '../screens/appScreens/CameraScreen';
 import SearchScreen from '../screens/appScreens/SearchScreen';
+
 import Icon from 'react-native-vector-icons/Ionicons'
 const AppTabNavigator = createBottomTabNavigator({
 	SearchScreen: {

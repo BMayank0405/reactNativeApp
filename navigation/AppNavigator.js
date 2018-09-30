@@ -1,14 +1,15 @@
 
 import { createSwitchNavigator } from 'react-navigation';
-import AppStackNavigator from './AppStackNavigator';
+import AppTabNavigator from './AppTabNavigator';
 //screens
 import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
-import CameraScreen from '../screens/appScreens/CameraScreen'
+import LogoutScreen from '../screens/LogoutScreen'
+
 
 export default createSwitchNavigator({
   AuthLoading: AuthLoadingScreen,
-  Check: CameraScreen,
+  Logout: LogoutScreen,
   Login: LoginScreen,
-  App: AppStackNavigator
+  App: AppTabNavigator
 });

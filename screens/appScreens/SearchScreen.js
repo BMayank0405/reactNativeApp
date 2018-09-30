@@ -1,15 +1,17 @@
 import React, { Component } from 'react'
-import { StyleSheet, Modal, FlatList, Alert, Image } from 'react-native';
+import { StyleSheet, Modal, FlatList, Alert, Image, Dimensions } from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import { Container, Content, Button, Text, Body, Grid, Spinner, Card, Icon, CardItem, Left } from 'native-base';
+import { connect } from 'react-redux';
 
 import MySpinner from '../../components/MySpinner'
 import MyHeader from '../../components/MyHeader'
+import { ClearImage } from "../../action/ClearImageAction";
 
-
-export default class MyDatePicker extends Component {
+class MyDatePicker extends Component {
 	constructor(props) {
 		super(props)
+		var { height, width } = Dimensions.get('window');
 		const Currdate = new Date();
 		const defaultDate = Currdate.getFullYear() + '-' + this._format(Currdate.getMonth()) + '-' + this._format(Currdate.getDate())
 		const nextDate = Currdate.getFullYear() + '-' + this._format(Currdate.getMonth()) + '-' + this._format(Currdate.getDate() + 1)
@@ -25,7 +27,9 @@ export default class MyDatePicker extends Component {
 				value: []
 			},
 			modalVisible: false,
-			isloading: false
+			isloading: false,
+			height,
+			width
 		}
 	}
 
@@ -34,15 +38,15 @@ export default class MyDatePicker extends Component {
 		return (
 			<Card>
 				<CardItem cardBody>
-					<Image source={{ uri: item.url }} style={{ height: 200, width: null, flex: 1 }} />
+					<Image source={{ uri: item.url }} style={{ flex: 1, height: (item.height * this.state.width) / item.width, width: this.state.width }} resizeMode="contain" />
 				</CardItem>
 				<CardItem>
 					<Left>
-						<Icon active name="thumbs-up" />
-						<Text>Update At</Text>
+						<Icon active name="md-time" />
+						<Text>Uploaded At</Text>
 					</Left>
 					<Body>
-						<Text>{this._convert(item.title)}</Text>
+						<Text>{this._convert(item.timestamp)}</Text>
 					</Body>
 				</CardItem>
 			</Card>
@@ -59,7 +63,7 @@ export default class MyDatePicker extends Component {
 	//end of timestamp functions
 
 
-	_keyExtractor = (item, index) => item.id.toString();
+	_keyExtractor = (item, index) => item._id.toString();
 
 	//validating dates
 	_StartDateChange(date) {
@@ -95,31 +99,26 @@ export default class MyDatePicker extends Component {
 		this.setState({
 			isloading: true
 		})
-		data = {
+		const value = {
 			startTime: this.state.startTime,
-			endTime: this.state.endTime
+			endTime: this.state.endTime,
+			email: this.props.userDtl.email
 		};
-		// fetch('https://pocappserver.herokuapp.com/getphotos', {
-		// 	method: "POST",
-		// 	mode: "cors",
-		// 	headers: {
-		// 		"Content-Type": "application/json; charset=utf-8"
-		// 	},
-		// 	body: JSON.stringify(data)
-		// }
-		// )
-		const item = await fetch('https://jsonplaceholder.typicode.com/photos', {
+		const data = JSON.stringify(value)
+		const item = await fetch('https://pocappserver.herokuapp.com/getphotos', {
+			method: "POST",
 			headers: {
-				"Content-Type": "application/json; charset=utf-8",
-			}
-		});
+				"Content-Type": "application/json; charset=utf-8"
+			},
+			body: data
+		}
+		)
 		const items = await item.json();
 		this.setState({
 			isloading: false,
 			modalVisible: true,
 			items: { value: items }
 		})
-		// console.log(this.state.items.value);
 
 	}
 
@@ -128,7 +127,7 @@ export default class MyDatePicker extends Component {
 			<MySpinner />
 			:
 			<Container>
-				<MyHeader />
+				<MyHeader logout={() => this.props.navigation.navigate('Logout')} />
 				<Container style={styles.container}>
 
 					<Content>
@@ -192,29 +191,49 @@ export default class MyDatePicker extends Component {
 							visible={this.state.modalVisible}
 							onRequestClose={() => {
 								Alert.alert(
-									'Alert Title',
-									'My Alert Msg',
+									'Confirm',
+									'Do you want to go back ?',
 									[
-										{ text: 'OK', onPress: () => this._setModalVisible(!this.state.modalVisible) },
 										{ text: 'Cancel', onPress: () => this._setModalVisible(this.state.modalVisible) },
+										{ text: 'OK', onPress: () => this._setModalVisible(!this.state.modalVisible) }
 									],
 									{ cancelable: false }
 								)
 
 							}}>
-							<Content >
-								<FlatList style={{ flex: 1 }}
-									data={this.state.items.value}
-									renderItem={this._cardItems}
-									keyExtractor={this._keyExtractor} />
-								<Body>
-									<Button onPress={() => {
-										this._setModalVisible(!this.state.modalVisible);
-									}}>
-										<Text>close modal</Text>
-									</Button>
-								</Body>
-							</Content>
+							{this.state.items.value.length > 0 ?
+								<Content>
+
+									<FlatList style={{ flex: 1 }}
+										data={this.state.items.value}
+										renderItem={this._cardItems}
+										keyExtractor={this._keyExtractor} />
+									<Body></Body>
+									<Body>
+										<Button onPress={() => {
+											this._setModalVisible(!this.state.modalVisible);
+										}}>
+											<Text>Go back</Text>
+										</Button>
+									</Body>
+
+								</Content> :
+								<Container style={{ margin: 10 }}>
+									<Content>
+										<Body>
+											<Text style={{ fontSize: 27 }}>You have no images in this duration.Please go back and try for some other combination.</Text>
+										</Body>
+										<Body>
+											<Button style={{ marginTop: 20 }} onPress={() => {
+												this._setModalVisible(!this.state.modalVisible);
+											}}>
+												<Text>Go back</Text>
+											</Button>
+										</Body>
+
+									</Content>
+								</Container>
+							}
 						</Modal>
 					</Content>
 				</Container>
@@ -248,3 +267,9 @@ const styles = StyleSheet.create({
 	}
 })
 
+const mapStateToProps = (state) => {
+	return ({
+		userDtl: state.user.userDetail
+	})
+}
+export default connect(mapStateToProps)(MyDatePicker)

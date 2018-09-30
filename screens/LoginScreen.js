@@ -4,7 +4,10 @@ import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux';
 import { Login } from '../action/LoginAction';
 import { Container, Content, Text, Spinner, Title, Button, Left, Right, Body, Icon, Toast } from 'native-base';
+import { Logout } from '../action/LogoutAction';
+
 import MySpinner from '../components/MySpinner'
+import MyHeader from "../components/MyHeader";
 class LoginScreen extends Component {
 
 	constructor(props) {
@@ -26,29 +29,59 @@ class LoginScreen extends Component {
 		this.setState({
 			isLoading: true
 		})
-		const user = await this.props.Login();
-		if (Object.keys(user).length > 1) {
-			try {
-				const result = await fetch('https://pocappserver.herokuapp.com/user', {
-					method: "POST",
-					mode: "cors",
-					body: JSON.stringify({
-						name: user.name,
-						photoUrl: user.photo,
-						email: user.email
+
+		try {
+			const result = await Expo.Google.logInAsync({
+				androidClientId: '117306357056-vejioaduaf6s3b4qavcqb8jerdj5659c.apps.googleusercontent.com',
+				scopes: ['profile', 'email'],
+			});
+			if (result.type === 'success') {
+
+				const Authuser = {
+					name: result.user.name,
+					photoUrl: result.user.photoUrl,
+					email: result.user.email
+				}
+				const data = JSON.stringify(Authuser)
+				try {
+					await fetch('https://pocappserver.herokuapp.com/user', {
+						method: "POST",
+						headers: {
+							'Content-Type': 'application/json; charset=utf-8'
+						},
+						body: data
+
 					})
+					try {
+						await this.props.Login(Authuser)
+						this.setState({
+							isLoading: false
+						})
+						this.props.navigation.navigate('App')
+					}
+					catch (err) {
+						console.log("login", err)
+						await this.props.Logout()
+					}
 
-				})
+				}
+				catch (err) {
+					console.log("fetch", err)
+					await this.props.Logout()
+				}
 
-				console.log(result);
-				this.setState({
-					isLoading: false
-				})
-				this.props.navigation.navigate(Object.keys(this.props.userDtl.userDetail || {}).length > 0 ? 'App' : 'Login')
+			} else {
+				console.log('cancelled');
+				return { cancelled: true };
 			}
-			catch (err) { }
-
+		} catch (e) {
+			console.log(`error: ${e}`);
+			return { error: true };
 		}
+		// const user = await this.props.Login();
+
+
+
 
 	}
 
@@ -62,11 +95,7 @@ class LoginScreen extends Component {
 		else {
 			return (
 				<Container >
-					<Header>
-						<Body>
-							<Title style={styles.header}>POC APP</Title>
-						</Body>
-					</Header>
+					<MyHeader />
 					<Container style={styles.container}>
 						<Content></Content>
 						<Content padder>
@@ -93,7 +122,7 @@ Login.propTypes = {
 
 const mapStateToProps = (state) => {
 	return ({
-		userDtl: state.user
+		userDtl: state.user.userDetail
 	})
 }
 
@@ -125,4 +154,4 @@ const styles = StyleSheet.create({
 	}
 })
 
-export default connect(mapStateToProps, { Login })(LoginScreen);
+export default connect(mapStateToProps, { Login, Logout })(LoginScreen);

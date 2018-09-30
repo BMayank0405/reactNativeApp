@@ -3,13 +3,15 @@ import { connect } from "react-redux";
 import { Font } from "expo"
 import MySpinner from '../components/MySpinner'
 import { GetDetail } from '../action/GetDetailAction';
+import { AsyncStorage } from 'react-native';
 
 
 class AuthLoadingScreen extends Component {
 
 	constructor(props) {
 		super(props)
-		// this._checkLogin()
+
+
 
 	}
 	async componentWillMount() {
@@ -17,12 +19,12 @@ class AuthLoadingScreen extends Component {
 			Roboto: require("native-base/Fonts/Roboto.ttf"),
 			Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf")
 		});
-		this.props.navigation.navigate('Check')
+		this._checkLogin()
 	}
 
 	//this function checks if user is present in redux state or in async storage then move to app screen else move to login screen
 	async _checkLogin() {
-		if (Object.keys(this.props.userDtl || {}).length > 0) {
+		if (typeof this.props.userDtl != "undefined" && Object.keys(this.props.userDtl || {}).length > 0) {
 			this.props.navigation.navigate('App')
 		}
 		else {
