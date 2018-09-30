@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Alert } from 'react-native'
 import { connect } from 'react-redux';
 import { Login } from '../action/LoginAction';
 import { Container, Content, Text, Spinner, Title, Button, Left, Right, Body, Icon, Toast } from 'native-base';
@@ -44,39 +44,64 @@ class LoginScreen extends Component {
 				}
 				const data = JSON.stringify(Authuser)
 				try {
-					await fetch('https://pocappserver.herokuapp.com/user', {
+					const result = await fetch('https://pocappserver.herokuapp.com/userss', {
 						method: "POST",
+						mode: 'cors',
 						headers: {
 							'Content-Type': 'application/json; charset=utf-8'
 						},
 						body: data
 
 					})
-					try {
-						await this.props.Login(Authuser)
+					console.log(result)
+					if (result.ok) {
+						try {
+							await this.props.Login(Authuser)
+							this.setState({
+								isLoading: false
+							})
+							this.props.navigation.navigate('App')
+						}
+						catch (err) {
+							console.log("login", err)
+							this.setState({
+								isLoading: false
+							})
+							await this.props.Logout()
+						}
+					}
+					else {
+						Alert.alert('Error', result.statusText)
 						this.setState({
 							isLoading: false
 						})
-						this.props.navigation.navigate('App')
-					}
-					catch (err) {
-						console.log("login", err)
 						await this.props.Logout()
 					}
 
+
 				}
 				catch (err) {
-					console.log("fetch", err)
+					console.log("fetch")
+					Alert.alert('Error', 'Fetch error')
+					this.setState({
+						isLoading: false
+					})
 					await this.props.Logout()
 				}
 
 			} else {
 				console.log('cancelled');
-				return { cancelled: true };
+				Alert.alert('Error', 'You canceled authentication process')
+				this.setState({
+					isLoading: false
+				})
 			}
 		} catch (e) {
 			console.log(`error: ${e}`);
-			return { error: true };
+			Alert.alert('Error', e)
+			this.setState({
+				isLoading: false
+			})
 		}
 		// const user = await this.props.Login();
 

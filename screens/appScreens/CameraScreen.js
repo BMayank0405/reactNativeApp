@@ -97,18 +97,29 @@ class CameraComponent extends Component {
 		});
 		try {
 			const result = await fetch('https://pocappserver.herokuapp.com/savePhotos', {
-				method: 'post',
+				method: 'POST',
+				mode: 'cors',
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				},
 				body: data
 			})
-			this.setState({
-				isloading: false,
-				newPhoto: false
-			})
-			await this.props.ClearImage();
-			Alert.alert('Success', 'Image has been Uploaded Successfully.')
+			if (result.ok) {
+				this.setState({
+					isloading: false,
+					newPhoto: false
+				})
+				await this.props.ClearImage();
+				Alert.alert('Success', 'Image has been Uploaded Successfully.')
+			}
+			else {
+				this.setState({
+					isloading: false,
+					newPhoto: false
+				})
+				Alert.alert('Error', result.statusText)
+			}
+
 		}
 		catch (err) {
 			this.setState({

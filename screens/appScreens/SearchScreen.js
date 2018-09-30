@@ -107,18 +107,29 @@ class MyDatePicker extends Component {
 		const data = JSON.stringify(value)
 		const item = await fetch('https://pocappserver.herokuapp.com/getphotos', {
 			method: "POST",
+			mode: 'cors',
 			headers: {
 				"Content-Type": "application/json; charset=utf-8"
 			},
 			body: data
 		}
 		)
-		const items = await item.json();
-		this.setState({
-			isloading: false,
-			modalVisible: true,
-			items: { value: items }
-		})
+		if (item.ok) {
+			const items = await item.json();
+			this.setState({
+				isloading: false,
+				modalVisible: true,
+				items: { value: items }
+			})
+		}
+		else {
+			this.setState({
+				isloading: false,
+				modalVisible: false
+			})
+			Alert.alert('Error', item.statusText)
+		}
+
 
 	}
 
