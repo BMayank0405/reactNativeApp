@@ -44,7 +44,7 @@ class LoginScreen extends Component {
 				}
 				const data = JSON.stringify(Authuser)
 				try {
-					const result = await fetch('https://pocappserver.herokuapp.com/userss', {
+					const result = await fetch('https://pocappserver.herokuapp.com/users', {
 						method: "POST",
 						mode: 'cors',
 						headers: {
